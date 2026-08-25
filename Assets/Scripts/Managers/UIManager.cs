@@ -1,0 +1,139 @@
+using UnityEngine;
+using System;
+using DG.Tweening;
+using System.Collections;
+using System.Collections.Generic;
+
+public class UIManager : MonoBehaviour
+{
+    [Header("UI References")]
+    [SerializeField] private CanvasGroup _loadingScreen;
+    [SerializeField] private CanvasGroup _gameOverScreen;
+    [SerializeField] private CanvasGroup _pauseScreen;
+    [SerializeField] private CanvasGroup _winScreen;
+
+    [Header("Scene Transition Speed")]
+    [SerializeField] private float _globalTransitionSpeed = 1f;
+
+    [Header("Outline Shader References")]
+    [SerializeField] private Material _blackHighlight;
+    [SerializeField] private Material _yellowHighlight;
+
+    private void Awake()
+    {
+        
+    }
+
+    private void OnEnable() {
+        GameEvents.OnFadeOutUIElementRequested += FadeOutUIElement;
+        GameEvents.OnFadeInUIElementRequested += FadeInUIElement;
+    }
+
+    private void OnDisable() {
+        GameEvents.OnFadeOutUIElementRequested -= FadeOutUIElement;
+        GameEvents.OnFadeInUIElementRequested -= FadeInUIElement;
+    }
+
+    private void ShowGameOverScreen()
+    {
+        _gameOverScreen.alpha = 1f;
+        _gameOverScreen.interactable = true;
+        _gameOverScreen.blocksRaycasts = true;
+        Debug.Log("[UIManager] Showing Game Over Screen");
+    }
+    private void HideGameOverScreen()
+    {
+        _gameOverScreen.alpha = 0f;
+        _gameOverScreen.interactable = false;
+        _gameOverScreen.blocksRaycasts = false;
+        Debug.Log("[UIManager] Hiding Game Over Screen");
+    }
+    
+    private void ShowPauseScreen()
+    {
+        _pauseScreen.alpha = 1f;
+        _pauseScreen.interactable = true;
+        _pauseScreen.blocksRaycasts = true;
+        Debug.Log("[UIManager] Showing Pause Screen");
+    }
+    private void HidePauseScreen()
+    {
+        _pauseScreen.alpha = 0f;
+        _pauseScreen.interactable = false;
+        _pauseScreen.blocksRaycasts = false;
+        Debug.Log("[UIManager] Hiding Pause Screen");
+    }
+
+    private void ShowWinScreen()
+    {
+        _winScreen.alpha = 1f;
+        _winScreen.interactable = true;
+        _winScreen.blocksRaycasts = true;
+        Debug.Log("[UIManager] Showing Win Screen");
+    }
+    private void HideWinScreen()
+    {
+        _winScreen.alpha = 0f;
+        _winScreen.interactable = false;
+        _winScreen.blocksRaycasts = false;
+        Debug.Log("[UIManager] Hiding Win Screen");
+    }
+
+    private void FadeInUIElement(float duration, CanvasGroup canvasGroup = null, Canvas canvas = null)
+    {
+        if (canvasGroup == null && canvas == null)
+        {
+            Debug.LogWarning("[UIManager] No CanvasGroup or Canvas provided for fade in.");
+            return;
+        }
+
+        CanvasGroup cg = canvasGroup;
+        if (cg == null)
+        {
+            cg = canvas.GetComponent<CanvasGroup>();
+            if (cg == null)
+            {
+                cg = canvas.gameObject.AddComponent<CanvasGroup>();
+            }
+        }
+
+        if (canvas != null) 
+        {
+            canvas.enabled = true; 
+        }
+        cg.gameObject.SetActive(true);
+        cg.DOFade(1f, duration).OnComplete(() => 
+        {
+            cg.interactable = true;
+            cg.blocksRaycasts = true;
+        });
+    }
+
+    private void FadeOutUIElement(float duration, CanvasGroup canvasGroup = null, Canvas canvas = null)
+    {
+        if (canvasGroup == null && canvas == null)
+        {
+            Debug.LogWarning("[UIManager] No CanvasGroup or Canvas provided for fade out.");
+            return;
+        }
+
+        CanvasGroup cg = canvasGroup;
+        if (cg == null)
+        {
+            cg = canvas.GetComponent<CanvasGroup>();
+            if (cg == null)
+            {
+                cg = canvas.gameObject.AddComponent<CanvasGroup>();
+            }
+        }
+
+        // disable interaction and raycasting before starting the fade
+        cg.interactable = false;
+        cg.blocksRaycasts = false;
+
+        cg.DOFade(0f, duration).OnComplete(() => 
+        {
+            cg.gameObject.SetActive(false);
+        });
+    }
+}
