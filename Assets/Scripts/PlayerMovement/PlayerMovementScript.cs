@@ -9,6 +9,7 @@ public class PlayerMovementScript : MonoBehaviour
     [SerializeField] private GameObject inventoryCanvas;
     [SerializeField] private float interactRange = 3f;
     [SerializeField] private Inventory playerInventory;
+    [SerializeField] private GameObject pickUpPrompt;
 
     private CharacterController characterController;
     private float cameraPitch;
@@ -71,6 +72,8 @@ public class PlayerMovementScript : MonoBehaviour
         if (Physics.Raycast(ray, out RaycastHit hit, interactRange))
         {
             InteractableItem interactable = hit.collider != null ? hit.collider.GetComponent<InteractableItem>() : null;
+
+            pickUpPrompt.SetActive(interactable != null);
 
             if (interactable != null && Input.GetKeyDown(KeyCode.E))
             {
