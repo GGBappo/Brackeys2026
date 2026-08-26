@@ -7,45 +7,62 @@ public class Slot : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 {
     public bool hovering;
 
+    [SerializeField] private ItemDescriptionHolder itemDescriptionHolder;
+
     private ItemSO item;
     private Image icon;
 
-
     private void Awake()
     {
-        icon = transform.GetChild(0).GetComponent<Image>();
+        if (itemDescriptionHolder == null)
+        {
+            itemDescriptionHolder = GameObject.Find("InventoryManager").GetComponent<ItemDescriptionHolder>();
+        }
+    }
+
+    public Image GetIcon()
+    {
+        if (icon == null)
+        {
+            icon = transform.GetChild(0).GetComponent<Image>();
+        }
+        return icon;
     }
 
     public ItemSO GetItem()
     {
+        if(item == null)
+        {
+            Debug.Log("Slot is empty.");
+        }
         return item;
     }
 
     public void setItem(ItemSO newItem)
     {
         item = newItem;
-        icon.sprite = item.itemIcon;
+        GetIcon().sprite = item.itemIcon;
     }
 
     public void UpdateSlot()
     {
         if(item != null)
         {
-            icon.enabled = true;
-            icon.sprite = item.itemIcon;
+            GetIcon().enabled = true;
+            GetIcon().sprite = item.itemIcon;
         }
         else
         {
-            icon.enabled = false;
-            icon.sprite = null;
+            GetIcon().enabled = false;
+            GetIcon().sprite = null;
         }
     }
 
     public void ClearSlot()
     {
         item = null;
-        icon.enabled = false;
-        icon.sprite = null;
+        GetIcon().enabled = false;
+        GetIcon().sprite = null;
 
         UpdateSlot();
     }
@@ -58,12 +75,20 @@ public class Slot : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
     public void OnPointerEnter(PointerEventData eventData)
     {
         hovering = true;
-        Debug.Log("Hovering over slot with item: " + (item != null ? item.itemName : "None"));
+
+        if (itemDescriptionHolder != null)
+        {
+            itemDescriptionHolder.SetItem(item);
+        }
     }
 
     public void OnPointerExit(PointerEventData eventData)
     {
         hovering = false;
-        Debug.Log("Stopped hovering over slot with item: " + (item != null ? item.itemName : "None"));
+
+        if (itemDescriptionHolder != null)
+        {
+            itemDescriptionHolder.Clear();
+        }
     }
-}  
+}

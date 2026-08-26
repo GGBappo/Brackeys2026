@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 //using UnityEngine.EventSystems;
 
-public class InteractableItem : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
+public class InteractableItem : MonoBehaviour
 {
     [Header("Item Data")]
     [SerializeField] private ItemSO itemData;
@@ -36,20 +36,4 @@ public class InteractableItem : MonoBehaviour, IPointerEnterHandler, IPointerExi
     }
 
     public ItemSO item { get => itemData; }
-
-    public void OnPointerEnter(PointerEventData eventData)
-    {
-        if (pickupPrompt != null)
-        {
-            pickupPrompt.SetActive(true);
-        }
-    }
-
-    public void OnPointerExit(PointerEventData eventData)
-    {
-        if (pickupPrompt != null)
-        {
-            pickupPrompt.SetActive(false);
-        }
-    }
 }
