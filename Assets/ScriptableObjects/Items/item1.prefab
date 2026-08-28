@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 5298024287573517232}
   - component: {fileID: 2688572845432094924}
   - component: {fileID: 7433420032346571988}
+  - component: {fileID: 6065112883738230324}
   m_Layer: 0
   m_Name: item1
   m_TagString: Untagged
@@ -113,6 +114,23 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &6065112883738230324
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4120231579462334050}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 10f4fed49f4b113428ec0937c1cccfaf, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::InteractableItem
+  itemData: {fileID: 11400000, guid: 70786fb5333737d488cd5a0f0849f2a6, type: 2}
+  itemCollider: {fileID: 7433420032346571988}
+  playerInventory: {fileID: 0}
+  playerCollider: {fileID: 0}
+  pickupPrompt: {fileID: 4120231579462334050}
 --- !u!1 &8761668787571017971
 GameObject:
   m_ObjectHideFlags: 0
