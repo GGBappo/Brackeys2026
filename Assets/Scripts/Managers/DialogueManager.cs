@@ -233,6 +233,24 @@ public class DialogueManager : MonoBehaviour
         }
 
         currentNode = _nodeLookup[nodeID];
+
+        if (currentNode.Conditions != null && currentNode.Conditions.Count > 0)
+        {
+            bool conditionResult = MemoryBoard.EvaluateConditions(currentNode.Conditions);
+            string targetNodeID = conditionResult ? currentNode.TrueNodeID : currentNode.FalseNodeID;
+
+            if (!string.IsNullOrEmpty(targetNodeID))
+            {
+                ShowNode(targetNodeID); 
+            }
+            else
+            {
+                EndDialogue();
+            }
+            
+            return; 
+        }
+
         dialogueUIPrefab.SetActive(true);
 
         if (speakerNameText != null)
@@ -289,10 +307,8 @@ public class DialogueManager : MonoBehaviour
                     }
                     var choiceButtonContainerLayout = choiceButtonContainer.GetComponent<HorizontalLayoutGroup>();
                     LayoutRebuilder.ForceRebuildLayoutImmediate(choiceButtonContainerLayout.GetComponent<RectTransform>());
-
                 });
         }
-        
 
         ExecuteNodeAction(currentNode.Action);
 
@@ -308,7 +324,6 @@ public class DialogueManager : MonoBehaviour
             }
             return;
         }
-        
     }
 
     private void ExecuteNodeAction(ActionData actionData)

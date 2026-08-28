@@ -86,6 +86,10 @@ public class DialogueGraphImporter : ScriptedImporter
             else if (node is ActionNode actionNode){
                 ProcessActionNode(actionNode, runtimeNode, nodeIDMap);
             }
+            else if (node is ConditionalNode conditionalNode)
+            {
+                ProcessConditionalNode(conditionalNode, runtimeNode, nodeIDMap);
+            }
 
             // finally we'll add our runtime node to the runtime graph
             runtimeGraph.AllNodes.Add(runtimeNode);
@@ -96,6 +100,7 @@ public class DialogueGraphImporter : ScriptedImporter
         ctx.SetMainObject(runtimeGraph);
     }
 
+    #region Node Processing Functions
     // this function is used to process the dialogue node and assign its values to the runtime node
     // we'll be using this in the foreach loop in the OnImportAsset function to process each dialogue node and assign its values to the runtime node
     private void ProcessDialogueNode(DialogueNode node, RuntimeDialogueNode runtimeNode, Dictionary<INode, string> nodeIDMap)
@@ -116,6 +121,7 @@ public class DialogueGraphImporter : ScriptedImporter
 
     private void ProcessChoiceNode(ChoiceNode node, RuntimeDialogueNode runtimeNode, Dictionary<INode, string> nodeIDMap)
     {
+        // get node port values
         runtimeNode.SpeakerName = GetPortValue<string>(node.GetInputPortByName("Speaker Name"));
         runtimeNode.DialogueText = GetPortValue<string>(node.GetInputPortByName("Dialogue Text"));
         runtimeNode.SpeakerImage = GetPortValue<Sprite>(node.GetInputPortByName("Speaker Image"));
@@ -139,12 +145,14 @@ public class DialogueGraphImporter : ScriptedImporter
 
 
     private void ProcessActionNode(ActionNode node, RuntimeDialogueNode runtimeNode, Dictionary<INode, string> nodeIDMap){
-        // here we're getting the value of the action port and assigning it to the runtime node's action data
+        // get node option values, not ports since we're not recieving data for this node
         var option = node.GetNodeOptionByName("actionType");
         option.TryGetValue(out ActionNodeType actionType);
 
+        // create an ActionData object to hold the action type and any additional data
         var actionData = new ActionData { Action = actionType };
 
+        // check specific action data
         if (actionType == ActionNodeType.ChangeDialogueBoxPosition)
         {
             var dialogueBoxPositionPort = node.GetInputPortByName("Dialogue Box Position");
@@ -160,6 +168,34 @@ public class DialogueGraphImporter : ScriptedImporter
         }
     }
 
+    public void ProcessConditionalNode(ConditionalNode node, RuntimeDialogueNode runtimeNode, Dictionary<INode, string> nodeIDMap)
+    {
+        node.GetNodeOptionByName("conditionalCount").TryGetValue(out int conditionCount);
+        for (int i = 0; i < conditionCount; i++)
+        {
+            var conditionPort = node.GetInputPortByName($"Statement {i + 1}");
+            if (conditionPort != null)
+            {
+                var conditionData = GetPortValue<ConditionData>(conditionPort);
+                if (conditionData != null)
+                {
+                    runtimeNode.Conditions.Add(conditionData);
+                }
+            }
+        }
+        //runtimeNode.Conditions = conditionBlock.;
+
+        var trueNode = node.GetOutputPortByName("True")?.firstConnectedPort;
+        if (trueNode != null){
+            runtimeNode.TrueNodeID = nodeIDMap[trueNode.GetNode()];
+        }
+    
+        var falseNode = node.GetOutputPortByName("False")?.firstConnectedPort;
+        if (falseNode != null){
+            runtimeNode.FalseNodeID = nodeIDMap[falseNode.GetNode()];
+        }
+    }
+    #endregion
     // this function is a generic function which gets the value of the port
     // this function checks whether the port is connected to a variable in the blackboard or not
     // if not, it takes the value that is typed in manually in the port itself

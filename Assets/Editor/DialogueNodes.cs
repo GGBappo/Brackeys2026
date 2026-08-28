@@ -3,6 +3,7 @@ using UnityEditor;
 using UnityEngine;
 using UnityEngine.UI;
 using Unity.GraphToolkit.Editor;
+using System.Collections.Generic;
 
 /// <summary>
 /// A node that represents the starting point of the dialogue graph.
@@ -76,7 +77,6 @@ public class ChoiceNode : Node
     }
 }
 
-
 [Serializable]
 public class ActionNode : Node
 {
@@ -100,6 +100,33 @@ public class ActionNode : Node
         }
 
         context.AddOutputPort("out").Build();
+    }
+}
+
+[Serializable]
+public class ConditionalNode: Node
+{
+    public const string optionID = "conditionalCount";
+
+    protected override void OnDefineOptions(IOptionDefinitionContext context)
+    {
+        //context.AddOption<List<ConditionData>>("Conditions").WithDefaultValue(new List<ConditionData>()).Delayed();
+        context.AddOption<int>(optionID).WithDefaultValue(1).Delayed();
+    }
+    
+    protected override void OnDefinePorts(IPortDefinitionContext context)
+    {
+        context.AddInputPort("in").Build();
+        context.AddOutputPort("True").Build();
+        context.AddOutputPort("False").Build();
+
+        var option = GetNodeOptionByName(optionID);
+        option.TryGetValue(out int count);
+        
+        for (int i = 0; i < count; i++)
+        {
+            context.AddInputPort<ConditionData>($"Statement {i + 1}").Build();
+        }
     }
 }
 
