@@ -109,6 +109,7 @@ public class DialogueGraphImporter : ScriptedImporter
         runtimeNode.SpeakerName = GetPortValue<string>(node.GetInputPortByName("Speaker Name"));
         runtimeNode.DialogueText = GetPortValue<string>(node.GetInputPortByName("Dialogue Text"));
         runtimeNode.SpeakerImage = GetPortValue<Sprite>(node.GetInputPortByName("Speaker Image"));
+        runtimeNode.VoiceLine = GetPortValue<AudioClip>(node.GetInputPortByName("Voice Line"));
 
         // now the next most important part is getting the ID of the next node/the node that it is connected to
         // this is done by getting the output port of the current node and checking if it is connected to another node
@@ -125,6 +126,7 @@ public class DialogueGraphImporter : ScriptedImporter
         runtimeNode.SpeakerName = GetPortValue<string>(node.GetInputPortByName("Speaker Name"));
         runtimeNode.DialogueText = GetPortValue<string>(node.GetInputPortByName("Dialogue Text"));
         runtimeNode.SpeakerImage = GetPortValue<Sprite>(node.GetInputPortByName("Speaker Image"));
+        runtimeNode.VoiceLine = GetPortValue<AudioClip>(node.GetInputPortByName("Voice Line"));
 
         var choiceOutputPorts = node.GetOutputPorts().Where(p => p.name.StartsWith("Choice "));
 
@@ -157,6 +159,14 @@ public class DialogueGraphImporter : ScriptedImporter
         {
             var dialogueBoxPositionPort = node.GetInputPortByName("Dialogue Box Position");
             actionData.dialogueBoxPosition = GetPortValue<DialogueBoxPosition>(dialogueBoxPositionPort);
+        }
+        else if (actionType == ActionNodeType.UpdateMemoryBoard)
+        {
+            var keyPort = node.GetInputPortByName("Memory Key");
+            var valuePort = node.GetInputPortByName("Memory Value");
+            
+            actionData.MemoryKey = GetPortValue<string>(keyPort);
+            actionData.MemoryValue = GetPortValue<string>(valuePort);
         }
 
         runtimeNode.Action = actionData;

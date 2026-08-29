@@ -36,6 +36,12 @@ public class DialogueManager : MonoBehaviour
     private GlobalStateType _stateBeforeDialogue = GlobalStateType.Active;
     private bool _hasStoredState;
 
+    [Header("Audio Settings")]
+    public AudioSource voiceAudioSource; 
+    public string defaultPrintSFXName = "DialogueBlip"; 
+
+    private int _lastVisibleCharacterCount = 0;
+
     private void OnEnable()
     {
         GameEvents.OnRequestShowDialogueUI += ShowDialogueUI;
@@ -267,12 +273,32 @@ public class DialogueManager : MonoBehaviour
         {
             dialogueText.text = currentNode.DialogueText;
             dialogueText.maxVisibleCharacters = 0;
+            _lastVisibleCharacterCount = 0;
+
+            if (currentNode.VoiceLine != null && voiceAudioSource != null)
+            {
+                voiceAudioSource.clip = currentNode.VoiceLine;
+                voiceAudioSource.Play();
+            }
 
             int totalCharacters = currentNode.DialogueText.Length;
-            float printDuration = totalCharacters * 0.02f;
+            float printDuration = currentNode.VoiceLine != null ? currentNode.VoiceLine.length : totalCharacters * 0.02f;
 
             _textPrint = DOTween.To(() => dialogueText.maxVisibleCharacters, x => dialogueText.maxVisibleCharacters = x, totalCharacters, printDuration)
-                .SetEase(Ease.Linear) 
+                .SetEase(Ease.Linear)
+                .OnUpdate(() =>
+                {
+                    if (currentNode.VoiceLine == null && dialogueText.maxVisibleCharacters > _lastVisibleCharacterCount)
+                    {
+                        _lastVisibleCharacterCount = dialogueText.maxVisibleCharacters;
+                        
+                        char latestChar = dialogueText.text[_lastVisibleCharacterCount - 1];
+                        if (latestChar != ' ')
+                        {
+                            GameEvents.RequestPlaySFX(defaultPrintSFXName); 
+                        }
+                    }
+                })
                 .OnComplete(() => 
                 {
                     if (currentNode.Choices.Count > 0)
@@ -343,6 +369,9 @@ public class DialogueManager : MonoBehaviour
                 break;
             case ActionNodeType.ChangeDialogueBoxPosition:
                 GameEvents.RequestDialogueBoxMove(actionData.dialogueBoxPosition);
+                break;
+            case ActionNodeType.UpdateMemoryBoard:
+                MemoryBoard.SetVariable(actionData.MemoryKey, actionData.MemoryValue);
                 break;
             default:
                 break;

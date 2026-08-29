@@ -20,6 +20,7 @@ public class RuntimeDialogueNode
     public string SpeakerName;
     public string DialogueText;
     public Sprite SpeakerImage;
+    public AudioClip VoiceLine;
 
     // choice node specific
     public List<ChoiceData> Choices = new List<ChoiceData>();
@@ -45,6 +46,8 @@ public class ActionData
 {
     public ActionNodeType Action;
     public DialogueBoxPosition dialogueBoxPosition;
+    public string MemoryKey;
+    public string MemoryValue;
 }
 
 [Serializable]
