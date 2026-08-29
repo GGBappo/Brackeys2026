@@ -12,28 +12,10 @@ public class InteractableItem : MonoBehaviour
 
     [Header("Player Information")]
     [SerializeField] private Inventory playerInventory;
-    [SerializeField] private Collider playerCollider;
 
     [Header("UI Feedback")]
     [SerializeField] private GameObject pickupPrompt;
 
-    private bool isInRange = false;
-
-    private void OnValidate()
-    {
-        if (playerCollider == null)
-        {
-            playerCollider = GameObject.FindGameObjectWithTag("Player").GetComponent<Collider>();
-        }
-        if (playerInventory == null)
-        {
-            playerInventory = GameObject.Find("Inventory").GetComponent<Inventory>();
-        }
-        if (itemCollider == null)
-        {
-            itemCollider = GetComponent<Collider>();
-        }
-    }
 
     public ItemSO item { get => itemData; }
 }

@@ -11,6 +11,9 @@ public class PlayerMovementScript : MonoBehaviour
     [SerializeField] private Inventory playerInventory;
     [SerializeField] private GameObject pickUpPrompt;
 
+    // Suspicion meter
+    [SerializeField] private SusMeter susMeter;
+
     private CharacterController characterController;
     private float cameraPitch;
     private Transform cameraTransform;
@@ -71,9 +74,14 @@ public class PlayerMovementScript : MonoBehaviour
 
         if (Physics.Raycast(ray, out RaycastHit hit, interactRange))
         {
-            InteractableItem interactable = hit.collider != null ? hit.collider.GetComponent<InteractableItem>() : null;
+            InteractableItem interactable = hit.collider != null
+                ? hit.collider.GetComponent<InteractableItem>()
+                : null;
 
-            pickUpPrompt.SetActive(interactable != null);
+            if (pickUpPrompt != null)
+            {
+                pickUpPrompt.SetActive(interactable != null);
+            }
 
             if (interactable != null && Input.GetKeyDown(KeyCode.E))
             {
@@ -83,9 +91,30 @@ public class PlayerMovementScript : MonoBehaviour
                     return;
                 }
 
+                // Add item to inventory
                 playerInventory.AddItem(interactable.item);
+
                 Debug.Log($"Picked up {interactable.item.itemName}");
+
+                // Tell the suspicion system that an item was picked up
+                if (susMeter != null)
+                {
+                    susMeter.RegisterItemPickup();
+                }
+                else
+                {
+                    Debug.LogWarning("SusMeter is not assigned to PlayerMovementScript!");
+                }
+
+                // Remove item from world
                 Destroy(interactable.gameObject);
+            }
+        }
+        else
+        {
+            if (pickUpPrompt != null)
+            {
+                pickUpPrompt.SetActive(false);
             }
         }
     }
@@ -104,7 +133,10 @@ public class PlayerMovementScript : MonoBehaviour
     {
         bool inventoryOpen = IsInventoryOpen();
 
-        Cursor.lockState = inventoryOpen ? CursorLockMode.None : CursorLockMode.Locked;
+        Cursor.lockState = inventoryOpen
+            ? CursorLockMode.None
+            : CursorLockMode.Locked;
+
         Cursor.visible = inventoryOpen;
     }
 
@@ -118,8 +150,13 @@ public class PlayerMovementScript : MonoBehaviour
         float horizontal = Input.GetAxis("Horizontal");
         float vertical = Input.GetAxis("Vertical");
 
-        Vector3 movement = transform.right * horizontal + transform.forward * vertical;
-        characterController.Move(movement * moveSpeed * Time.deltaTime);
+        Vector3 movement =
+            transform.right * horizontal +
+            transform.forward * vertical;
+
+        characterController.Move(
+            movement * moveSpeed * Time.deltaTime
+        );
     }
 
     private void LookAround()
@@ -134,7 +171,8 @@ public class PlayerMovementScript : MonoBehaviour
 
         if (playerCamera != null)
         {
-            playerCamera.localRotation = Quaternion.Euler(cameraPitch, 0f, 0f);
+            playerCamera.localRotation =
+                Quaternion.Euler(cameraPitch, 0f, 0f);
         }
     }
 }
