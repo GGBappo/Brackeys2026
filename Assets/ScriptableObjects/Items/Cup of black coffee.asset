@@ -1,0 +1,19 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ea38e929e79e2d248b90b127a1882999, type: 3}
+  m_Name: Cup of black coffee
+  m_EditorClassIdentifier: Assembly-CSharp::ItemSO
+  itemName: Black coffee
+  itemIcon: {fileID: 21300000, guid: ee05e9f182689f748b6bc5f8b9c66217, type: 3}
+  itemDescription: Should be able to wake me up. Is there something in it?
+  itemPrefab: {fileID: 3146263336918930414, guid: 239b819df8a1e7240be851c8e92f786a, type: 3}
+  maxStackSize: 1
