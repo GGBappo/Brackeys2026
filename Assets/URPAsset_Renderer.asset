@@ -64,13 +64,13 @@ MonoBehaviour:
         serializedVersion: 2
         m_Bits: 64
       PassNames: []
-    overrideMaterial: {fileID: 2100000, guid: 5f8d1b8780226eb42a1feb99d7ed7157, type: 2}
+    overrideMaterial: {fileID: -876546973899608171, guid: 85372bdb3c5721149866a7e1cd15d354, type: 3}
     overrideMaterialPassIndex: 0
     overrideShader: {fileID: 0}
     overrideShaderPassIndex: 0
     overrideMode: 1
     overrideDepthState: 1
-    depthCompareFunction: 4
+    depthCompareFunction: 8
     enableWrite: 0
     stencilSettings:
       overrideStencilState: 0
