@@ -110,7 +110,8 @@ public class DialogueGraphImporter : ScriptedImporter
         runtimeNode.DialogueText = GetPortValue<string>(node.GetInputPortByName("Dialogue Text"));
         runtimeNode.SpeakerImage = GetPortValue<Sprite>(node.GetInputPortByName("Speaker Image"));
         runtimeNode.VoiceLine = GetPortValue<AudioClip>(node.GetInputPortByName("Voice Line"));
-
+        runtimeNode.IsPhoneText = GetPortValue<bool>(node.GetInputPortByName("Is Phone Text"));
+        
         // now the next most important part is getting the ID of the next node/the node that it is connected to
         // this is done by getting the output port of the current node and checking if it is connected to another node
         var nextNodePort = node.GetOutputPortByName("out")?.firstConnectedPort; // we keep this as nullable in the event it isnt connected

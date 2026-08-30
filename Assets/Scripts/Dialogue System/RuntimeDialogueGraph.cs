@@ -32,6 +32,9 @@ public class RuntimeDialogueNode
     public List<ConditionData> Conditions = new List<ConditionData>();
     public string TrueNodeID;
     public string FalseNodeID;
+
+    // impromtu phone shit im thinking about
+    public bool IsPhoneText;
 }
 
 [Serializable]

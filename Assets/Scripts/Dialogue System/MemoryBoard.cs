@@ -97,5 +97,26 @@ public static class MemoryBoard {
 
         return result;
     }
-    #endregion
+
+    public static void InitializeDefaults() 
+    {
+        memoryBoard.Clear(); 
+
+        // location & state flags
+        SetVariable("PlayerLocation", "Bedroom");
+        SetVariable("SuspicionLevel", "0");
+        SetVariable("CoffeeDelivered", "false");
+        SetVariable("DrankCoffee", "false");
+        SetVariable("HidInCloset", "false");
+
+        // scavenger hunt flags
+        SetVariable("Item_PillBottle", "false");
+        SetVariable("Item_Flowers", "false");
+        SetVariable("Item_Passport", "false");
+        SetVariable("Item_Sentimental", "false");
+        SetVariable("Item_Hammer", "false");
+        SetVariable("TotalItemsFound", "0");
+        SetVariable("Item_Ring", "false");
+    }
+    #endregion 
 }

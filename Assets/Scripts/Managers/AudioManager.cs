@@ -4,17 +4,8 @@ using UnityEngine;
 
 public class AudioManager : MonoBehaviour
 {
-    #region Singleton
-    public static AudioManager Instance { get; private set; }
     private void Awake()
     {
-        if (Instance != null && Instance != this)
-        {
-            Destroy(gameObject);
-            return;
-        }
-        Instance = this;
-        DontDestroyOnLoad(gameObject);
         foreach (var sound in SFX)
         {
             sound.SetAudioSource(gameObject.AddComponent<AudioSource>());
@@ -28,8 +19,7 @@ public class AudioManager : MonoBehaviour
             sound.SetAudioSource(gameObject.AddComponent<AudioSource>());
         }
     }
-    #endregion
-    
+
     public Sound[] SFX;
     public Sound[] Music;
     public Sound[] Ambient;
