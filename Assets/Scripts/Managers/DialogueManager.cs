@@ -36,6 +36,20 @@ public class DialogueManager : MonoBehaviour
     private GlobalStateType _stateBeforeDialogue = GlobalStateType.Active;
     private bool _hasStoredState;
 
+    [Header("Audio Settings")]
+    public AudioSource voiceAudioSource; 
+    public string defaultPrintSFXName = "DialogueBlip"; 
+
+    private int _lastVisibleCharacterCount = 0;
+
+    [Header("Phone UI")]
+    public GameObject phoneUIPrefab;
+    public TextMeshProUGUI phoneDialogueText;
+    public TextMeshProUGUI phoneSpeakerNameText;
+    public PhoneController phoneController;
+
+    public List<string> messageHistory = new List<string>();
+
     private void OnEnable()
     {
         GameEvents.OnRequestShowDialogueUI += ShowDialogueUI;
@@ -251,11 +265,55 @@ public class DialogueManager : MonoBehaviour
             return; 
         }
 
-        dialogueUIPrefab.SetActive(true);
-
-        if (speakerNameText != null)
+        if (currentNode.IsPhoneText)
         {
-            speakerNameText.text = currentNode.SpeakerName;
+            dialogueUIPrefab.SetActive(false);
+            phoneUIPrefab.SetActive(true);
+            GameEvents.RequestPlaySFX("PhoneVibrate");
+
+            bool isPlayer = (currentNode.SpeakerName == "You" || currentNode.SpeakerName == "MC");
+            phoneController.ReceiveNewText(currentNode.DialogueText, isPlayer);
+
+            if (currentNode.Choices.Count > 0)
+            {
+                foreach (Transform child in phoneController.choiceContainer) Destroy(child.gameObject);
+
+                foreach (var choice in currentNode.Choices)
+                {
+                    var choiceData = choice; 
+                    Button btnObj = Instantiate(choiceButtonPrefab, phoneController.choiceContainer);
+                    
+                    TextMeshProUGUI buttonText = btnObj.GetComponentInChildren<TextMeshProUGUI>();
+                    if (buttonText != null) buttonText.text = choiceData.ChoiceText;
+                    
+                    btnObj.onClick.AddListener(() => 
+                    {
+                        phoneController.ReceiveNewText(choiceData.ChoiceText, true);
+                        
+                        if (!string.IsNullOrEmpty(choiceData.DestinationNodeID))
+                        {
+                            ShowNode(choiceData.DestinationNodeID);
+                        }
+                        else
+                        {
+                            EndDialogue();
+                        }
+                    });
+                }
+            }
+        }
+        else
+        {
+            phoneUIPrefab.SetActive(false);
+            dialogueUIPrefab.SetActive(true);
+        }
+
+        TextMeshProUGUI activeDialogueText = currentNode.IsPhoneText ? phoneDialogueText : dialogueText;
+        TextMeshProUGUI activeSpeakerText = currentNode.IsPhoneText ? phoneSpeakerNameText : speakerNameText;
+
+        if (activeSpeakerText != null)
+        {
+            activeSpeakerText.text = currentNode.SpeakerName;
         }
 
         if (dialogueSpeakerImage != null)
@@ -263,16 +321,36 @@ public class DialogueManager : MonoBehaviour
             dialogueSpeakerImage.sprite = currentNode.SpeakerImage;
         }
 
-        if (dialogueText != null)
+        if (activeDialogueText != null)
         {
-            dialogueText.text = currentNode.DialogueText;
-            dialogueText.maxVisibleCharacters = 0;
+            activeDialogueText.text = currentNode.DialogueText;
+            activeDialogueText.maxVisibleCharacters = 0;
+            _lastVisibleCharacterCount = 0;
+
+            if (currentNode.VoiceLine != null && voiceAudioSource != null)
+            {
+                voiceAudioSource.clip = currentNode.VoiceLine;
+                voiceAudioSource.Play();
+            }
 
             int totalCharacters = currentNode.DialogueText.Length;
-            float printDuration = totalCharacters * 0.02f;
+            float printDuration = currentNode.VoiceLine != null ? currentNode.VoiceLine.length : totalCharacters * 0.02f;
 
-            _textPrint = DOTween.To(() => dialogueText.maxVisibleCharacters, x => dialogueText.maxVisibleCharacters = x, totalCharacters, printDuration)
-                .SetEase(Ease.Linear) 
+            _textPrint = DOTween.To(() => activeDialogueText.maxVisibleCharacters, x => activeDialogueText.maxVisibleCharacters = x, totalCharacters, printDuration)
+                .SetEase(Ease.Linear)
+                .OnUpdate(() =>
+                {
+                    if (currentNode.VoiceLine == null && activeDialogueText.maxVisibleCharacters > _lastVisibleCharacterCount)
+                    {
+                        _lastVisibleCharacterCount = activeDialogueText.maxVisibleCharacters;
+                        
+                        char latestChar = activeDialogueText.text[_lastVisibleCharacterCount - 1];
+                        if (latestChar != ' ')
+                        {
+                            GameEvents.RequestPlaySFX(defaultPrintSFXName); 
+                        }
+                    }
+                })
                 .OnComplete(() => 
                 {
                     if (currentNode.Choices.Count > 0)
@@ -344,6 +422,9 @@ public class DialogueManager : MonoBehaviour
             case ActionNodeType.ChangeDialogueBoxPosition:
                 GameEvents.RequestDialogueBoxMove(actionData.dialogueBoxPosition);
                 break;
+            case ActionNodeType.UpdateMemoryBoard:
+                MemoryBoard.SetVariable(actionData.MemoryKey, actionData.MemoryValue);
+                break;
             default:
                 break;
         }
@@ -352,6 +433,7 @@ public class DialogueManager : MonoBehaviour
     public void EndDialogue()
     {
         dialogueUIPrefab.SetActive(false);
+        if (phoneUIPrefab != null) phoneUIPrefab.SetActive(false);
         currentNode = null;
         _hasStoredState = false;
 
