@@ -170,6 +170,15 @@ public class DialogueGraphImporter : ScriptedImporter
             actionData.MemoryValue = GetPortValue<string>(valuePort);
         }
 
+        else if (actionType == ActionNodeType.TriggerBlackScreen)
+        {
+            var textPort = node.GetInputPortByName("Black Screen Text");
+            var durationPort = node.GetInputPortByName("Hold Duration");
+            
+            actionData.BlackScreenText = GetPortValue<string>(textPort);
+            actionData.HoldDuration = GetPortValue<float>(durationPort);
+        }
+
         runtimeNode.Action = actionData;
 
         var nextNodePort = node.GetOutputPortByName("out")?.firstConnectedPort; 

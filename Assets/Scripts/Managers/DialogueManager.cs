@@ -13,6 +13,7 @@ public enum DialogueBoxPosition
 
 public class DialogueManager : MonoBehaviour
 {
+    public static bool IsDialogueActive = false;
     [Header("Dialogue Graph")]
     public RuntimeDialogueGraph runtimeDialogueGraph;
 
@@ -224,6 +225,7 @@ public class DialogueManager : MonoBehaviour
 
     private void ShowNode(string nodeID)
     {
+        IsDialogueActive = true;
         if (_textPrint != null)
         {
             _textPrint.Kill(); 
@@ -425,6 +427,18 @@ public class DialogueManager : MonoBehaviour
             case ActionNodeType.UpdateMemoryBoard:
                 MemoryBoard.SetVariable(actionData.MemoryKey, actionData.MemoryValue);
                 break;
+            case ActionNodeType.TriggerBlackScreen:
+                BlackScreenController.Instance.PlaySequence(actionData.BlackScreenText, "HeartbeatSpike", actionData.HoldDuration);
+                break;
+            case ActionNodeType.EndBlackScreen:
+                BlackScreenController.Instance.ClearBlackScreen();
+                break;
+            case ActionNodeType.ShowSusMeter:
+                SusMeter.Instance.gameObject.SetActive(true);
+                break;
+            case ActionNodeType.HideSusMeter:
+                SusMeter.Instance.gameObject.SetActive(false);
+                break;
             default:
                 break;
         }
@@ -432,6 +446,7 @@ public class DialogueManager : MonoBehaviour
 
     public void EndDialogue()
     {
+        IsDialogueActive = false;
         dialogueUIPrefab.SetActive(false);
         if (phoneUIPrefab != null) phoneUIPrefab.SetActive(false);
         currentNode = null;

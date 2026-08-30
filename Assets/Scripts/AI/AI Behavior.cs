@@ -17,6 +17,18 @@ public class AIBehavior : MonoBehaviour
     private bool isPatrolling = false;
     private bool isWaiting = false;
 
+    private void OnEnable()
+    {
+        GameEvents.OnRequestDialogueStart += PausePatrol;
+        GameEvents.OnRequestDialogueEnd += ResumePatrol;
+    }
+
+    private void OnDisable()
+    {
+        GameEvents.OnRequestDialogueStart -= PausePatrol;
+        GameEvents.OnRequestDialogueEnd -= ResumePatrol;
+    }
+
     private void OnValidate()
     {
         if (agent == null)
@@ -83,5 +95,23 @@ public class AIBehavior : MonoBehaviour
         while (waypoints.Count > 1 && randomIndex == lastIndex);
 
         lastIndex = randomIndex;
+    }
+
+    private void PausePatrol(RuntimeDialogueGraph graph, string nodeID)
+    {
+        if (agent != null && agent.isActiveAndEnabled)
+        {
+            agent.isStopped = true;
+            isPatrolling = false;
+        }
+    }
+
+    private void ResumePatrol()
+    {
+        if (agent != null && agent.isActiveAndEnabled)
+        {
+            agent.isStopped = false;
+            isPatrolling = true;
+        }
     }
 }

@@ -2,5 +2,9 @@ public enum ActionNodeType{
     ShowDialouge,
     HideDialouge,
     ChangeDialogueBoxPosition,
-    UpdateMemoryBoard
+    UpdateMemoryBoard,
+    TriggerBlackScreen,
+    EndBlackScreen,
+    ShowSusMeter,
+    HideSusMeter
 }
