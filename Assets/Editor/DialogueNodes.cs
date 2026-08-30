@@ -31,6 +31,8 @@ public class DialogueNode : Node
         context.AddInputPort<string>("Speaker Name").Build();
         context.AddInputPort<string>("Dialogue Text").Build();
         context.AddInputPort<Sprite>("Speaker Image").Build();
+        context.AddInputPort<AudioClip>("Voice Line").Build();
+        context.AddInputPort<bool>("Is Phone Text").Build();
     }
 }
 
@@ -60,6 +62,8 @@ public class ChoiceNode : Node
         context.AddInputPort<string>("Speaker Name").Build();
         context.AddInputPort<string>("Dialogue Text").Build();
         context.AddInputPort<Sprite>("Speaker Image").Build();
+        context.AddInputPort<AudioClip>("Voice Line").Build();
+        context.AddInputPort<bool>("Is Phone Text").Build();
 
         var option = GetNodeOptionByName(optionID);
         option.TryGetValue(out int portCount);
@@ -97,6 +101,11 @@ public class ActionNode : Node
         if (currentAction == ActionNodeType.ChangeDialogueBoxPosition)
         {
             context.AddInputPort<DialogueBoxPosition>("Dialogue Box Position").Build();
+        }
+        else if (currentAction == ActionNodeType.UpdateMemoryBoard)
+        {
+            context.AddInputPort<string>("Memory Key").Build();
+            context.AddInputPort<string>("Memory Value").Build();
         }
 
         context.AddOutputPort("out").Build();

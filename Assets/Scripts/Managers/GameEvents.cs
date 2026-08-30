@@ -35,6 +35,52 @@ public static class GameEvents
     public static event Action OnRequestNPCInteractionSequence; // (no parameters)
     public static event Action OnRequestNPCInteractionSequenceExit; // (no parameters)
 
+    // Audio events
+    public static event Action<string> OnRequestPlaySFX;
+    public static event Action<string> OnRequestPlayMusic;
+    public static event Action<string> OnRequestPlayAmbient;
+    public static event Action<string> OnRequestStopSFX;
+    public static event Action<string> OnRequestStopMusic;
+    public static event Action<string> OnRequestStopAmbient;
+
+    #region Audio Calls
+    public static void RequestPlaySFX(string clipName)
+    {
+        Debug.Log($"[GameEvents] Requesting SFX: {clipName ?? "<null>"}");
+        OnRequestPlaySFX?.Invoke(clipName);
+    }
+
+    public static void RequestPlayMusic(string clipName)
+    {
+        Debug.Log($"[GameEvents] Requesting music: {clipName ?? "<null>"}");
+        OnRequestPlayMusic?.Invoke(clipName);
+    }
+
+    public static void RequestPlayAmbient(string clipName)
+    {
+        Debug.Log($"[GameEvents] Requesting ambient: {clipName ?? "<null>"}");
+        OnRequestPlayAmbient?.Invoke(clipName);
+    }
+
+    public static void RequestStopSFX(string clipName)
+    {
+        Debug.Log($"[GameEvents] Requesting stop SFX: {clipName ?? "<null>"}");
+        OnRequestStopSFX?.Invoke(clipName);
+    }
+
+    public static void RequestStopMusic(string clipName)
+    {
+        Debug.Log($"[GameEvents] Requesting stop music: {clipName ?? "<null>"}");
+        OnRequestStopMusic?.Invoke(clipName);
+    }
+
+    public static void RequestStopAmbient(string clipName)
+    {
+        Debug.Log($"[GameEvents] Requesting stop ambient: {clipName ?? "<null>"}");
+        OnRequestStopAmbient?.Invoke(clipName);
+    }
+    #endregion
+
     #region State Calls
     /// <summary>
     /// Invoke the OnGlobalStateChanged event to notify the state manager that the global state has changed

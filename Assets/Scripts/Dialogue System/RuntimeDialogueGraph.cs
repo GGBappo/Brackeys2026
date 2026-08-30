@@ -20,6 +20,7 @@ public class RuntimeDialogueNode
     public string SpeakerName;
     public string DialogueText;
     public Sprite SpeakerImage;
+    public AudioClip VoiceLine;
 
     // choice node specific
     public List<ChoiceData> Choices = new List<ChoiceData>();
@@ -31,6 +32,9 @@ public class RuntimeDialogueNode
     public List<ConditionData> Conditions = new List<ConditionData>();
     public string TrueNodeID;
     public string FalseNodeID;
+
+    // impromtu phone shit im thinking about
+    public bool IsPhoneText;
 }
 
 [Serializable]
@@ -45,6 +49,8 @@ public class ActionData
 {
     public ActionNodeType Action;
     public DialogueBoxPosition dialogueBoxPosition;
+    public string MemoryKey;
+    public string MemoryValue;
 }
 
 [Serializable]
