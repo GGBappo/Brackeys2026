@@ -17,6 +17,7 @@ public class PlayerMovementScript : MonoBehaviour
     private CharacterController characterController;
     private float cameraPitch;
     private Transform cameraTransform;
+    private GlobalStateType currentState = GlobalStateType.Active;
 
     private void Awake()
     {
@@ -28,6 +29,16 @@ public class PlayerMovementScript : MonoBehaviour
         }
 
         cameraTransform = playerCamera;
+    }
+
+    private void OnEnable()
+    {
+        GameEvents.OnGlobalStateChanged += UpdateState;
+    }
+
+    private void OnDisable()
+    {
+        GameEvents.OnGlobalStateChanged -= UpdateState;
     }
 
     private void OnValidate()
@@ -50,6 +61,11 @@ public class PlayerMovementScript : MonoBehaviour
             }
         }
     }
+    
+    private void UpdateState(GlobalStateType newState)
+    {
+        currentState = newState;
+    }
 
     private void Update()
     {
@@ -60,7 +76,7 @@ public class PlayerMovementScript : MonoBehaviour
 
         UpdateCursorState();
 
-        if (!IsInventoryOpen())
+        if (!IsInventoryOpen() && !DialogueManager.IsDialogueActive)
         {
             HandleInteraction();
             MovePlayer();
@@ -87,27 +103,13 @@ public class PlayerMovementScript : MonoBehaviour
             {
                 if (interactable.item == null)
                 {
-                    Debug.LogWarning($"'{interactable.name}' has no ItemSO assigned.");
+                    Debug.LogWarning($"'{interactable.gameObject.name}' has no ItemSO assigned.");
                     return;
                 }
 
-                // Add item to inventory
-                playerInventory.AddItem(interactable.item);
-
                 Debug.Log($"Picked up {interactable.item.itemName}");
-
-                // Tell the suspicion system that an item was picked up
-                if (susMeter != null)
-                {
-                    susMeter.RegisterItemPickup();
-                }
-                else
-                {
-                    Debug.LogWarning("SusMeter is not assigned to PlayerMovementScript!");
-                }
-
-                // Remove item from world
-                Destroy(interactable.gameObject);
+                
+                interactable.CollectItem();
             }
         }
         else
@@ -131,13 +133,13 @@ public class PlayerMovementScript : MonoBehaviour
 
     private void UpdateCursorState()
     {
-        bool inventoryOpen = IsInventoryOpen();
+        bool uiActive = IsInventoryOpen() || DialogueManager.IsDialogueActive;
 
-        Cursor.lockState = inventoryOpen
+        Cursor.lockState = uiActive
             ? CursorLockMode.None
             : CursorLockMode.Locked;
 
-        Cursor.visible = inventoryOpen;
+        Cursor.visible = uiActive;
     }
 
     private bool IsInventoryOpen()

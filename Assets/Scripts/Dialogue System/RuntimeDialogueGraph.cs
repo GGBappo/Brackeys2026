@@ -51,6 +51,8 @@ public class ActionData
     public DialogueBoxPosition dialogueBoxPosition;
     public string MemoryKey;
     public string MemoryValue;
+    public string BlackScreenText; 
+    public float HoldDuration;
 }
 
 [Serializable]

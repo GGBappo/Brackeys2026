@@ -31,6 +31,7 @@ public class Inventory : MonoBehaviour
             if (slot.HasItem() && slot.GetItem() == itemToAdd)
             {
                 slot.setItem(itemToAdd);
+                return; 
             }
         }
 
@@ -39,9 +40,10 @@ public class Inventory : MonoBehaviour
             if (!slot.HasItem())
             {
                 slot.setItem(itemToAdd);
-                break;
+                return; 
             }
         }
+        Debug.LogWarning("Inventory is full!");
     }
 
     private void FillItemData()

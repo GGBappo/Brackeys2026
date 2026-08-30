@@ -107,6 +107,11 @@ public class ActionNode : Node
             context.AddInputPort<string>("Memory Key").Build();
             context.AddInputPort<string>("Memory Value").Build();
         }
+        else if (currentAction == ActionNodeType.TriggerBlackScreen)
+        {
+            context.AddInputPort<string>("Black Screen Text").Build();
+            context.AddInputPort<float>("Hold Duration").Build();
+        }
 
         context.AddOutputPort("out").Build();
     }

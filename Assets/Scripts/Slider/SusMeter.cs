@@ -3,11 +3,26 @@ using UnityEngine.UI;
 
 public class SusMeter : MonoBehaviour
 {
+    // The static instance makes it globally accessible
+    public static SusMeter Instance { get; private set; }
+
     [SerializeField] private Slider suspicionSlider;
     [SerializeField] private float maxSuspicion = 100f;
     [SerializeField] private float suspicionIncreaseAmount = 10f;
 
     private float currentSuspicion = 0f;
+
+    private void Awake()
+    {
+        if (Instance != null && Instance != this) 
+        {
+            Destroy(gameObject);
+        }
+        else 
+        {
+            Instance = this;
+        }
+    }
 
     private void Start()
     {
@@ -34,17 +49,19 @@ public class SusMeter : MonoBehaviour
         }
 
         Debug.Log("Pickup happened INSIDE the suspicion zone!");
+        AddSuspicion(suspicionIncreaseAmount);
+    }
 
-        currentSuspicion = Mathf.Min(
-            currentSuspicion + suspicionIncreaseAmount,
-            maxSuspicion
-        );
+    public void AddSuspicion(float amount)
+    {
+        currentSuspicion = Mathf.Min(currentSuspicion + amount, maxSuspicion);
 
         if (suspicionSlider != null)
         {
-            suspicionSlider.value = currentSuspicion;
+            suspicionSlider.value = currentSuspicion; 
         }
 
+        MemoryBoard.SetVariable("SuspicionLevel", currentSuspicion.ToString());
         Debug.Log($"Suspicion increased to {currentSuspicion}");
     }
 }
