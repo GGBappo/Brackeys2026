@@ -22,8 +22,6 @@ public static class GameEvents
     public static event Action<DialogueBoxPosition> OnDialogueBoxMove;
     public static event Action<string> OnPingObjectToHighlight;
     public static event Action<string> OnPingObjectToUnhighlight;
-    
-
 
     // camera events
     public static event Action<Vector3, Quaternion, float, Vector3?, float?> OnCameraMoveRequest; // (position, rotation, duration, lookAtMarker, FOV)
@@ -42,6 +40,9 @@ public static class GameEvents
     public static event Action<string> OnRequestStopSFX;
     public static event Action<string> OnRequestStopMusic;
     public static event Action<string> OnRequestStopAmbient;
+
+    // dialogue
+    public static event Action OnDialogueSequenceCompleted;
 
     #region Audio Calls
     public static void RequestPlaySFX(string clipName)
@@ -297,6 +298,14 @@ public static class GameEvents
     {
         Debug.Log("[GameEvents] Requesting exit of NPC interaction sequence");
         OnRequestNPCInteractionSequenceExit?.Invoke();
+    }
+    #endregion
+
+    #region Dialogue Calls
+    public static void DialogueSequenceCompleted()
+    {
+        Debug.Log("[GameEvents] Dialogue sequence completed");
+        OnDialogueSequenceCompleted?.Invoke();
     }
     #endregion
 }

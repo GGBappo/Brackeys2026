@@ -41,9 +41,8 @@ public class AISuspicionZone : MonoBehaviour
                 susLevel++;
                 MemoryBoard.SetVariable("SuspicionLevel", susLevel.ToString());
                 
-                if (susLevel >= 3) 
+                if (susLevel >= 100) 
                 {
-                    // Passes the Game Over graph directly, using the default entry node[cite: 17, 18]
                     GameEvents.RequestDialogueStart(gameOverGraph, null);
                     return;
                 }
@@ -53,7 +52,11 @@ public class AISuspicionZone : MonoBehaviour
         }
         else
         {
-            GameEvents.RequestDialogueStart(friendlyGraph, null);
+            if (MemoryBoard.GetVariable("FriendlyIntroPlayed") != "true")
+            {
+                MemoryBoard.SetVariable("FriendlyIntroPlayed", "true");
+                GameEvents.RequestDialogueStart(friendlyGraph, null);
+            }
         }
     }
 

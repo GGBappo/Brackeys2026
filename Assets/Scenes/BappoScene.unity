@@ -6650,6 +6650,7 @@ MonoBehaviour:
   phoneTextGraph: {fileID: 3277075055506750867, guid: e54eb0d1463e6f54cb6758acab389cb2, type: 3}
   partnerAI: {fileID: 7200912942665331177}
   livingRoomWaypoint: {fileID: 296574498}
+  suspicionZone: {fileID: 7200912942665331178}
   delayBeforePhoneText: 4
 --- !u!4 &1677769689
 Transform:
@@ -16828,6 +16829,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7e6fa8cefe52be44f9784e6c406005a5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AIBehavior
+--- !u!114 &7200912942665331178 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 6839107766519516014, guid: e0966d3c087489640804368c0f5493c0, type: 3}
+  m_PrefabInstance: {fileID: 7200912942665331176}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e92d59d9bb1e68a44b0fd5f5db2fac5a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::AISuspicionZone
 --- !u!23 &7202271456064793077
 MeshRenderer:
   m_ObjectHideFlags: 0

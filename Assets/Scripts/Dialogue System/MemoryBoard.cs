@@ -117,6 +117,9 @@ public static class MemoryBoard {
         SetVariable("Item_Hammer", "false");
         SetVariable("TotalItemsFound", "0");
         SetVariable("Item_Ring", "false");
+
+        // misc flags
+        SetVariable("FriendlyIntroPlayed", "false");
     }
     #endregion 
 }
