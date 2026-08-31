@@ -54,7 +54,7 @@ public class SusMeter : MonoBehaviour
 
     public void AddSuspicion(float amount)
     {
-        currentSuspicion = Mathf.Min(currentSuspicion + amount, maxSuspicion);
+        currentSuspicion = Mathf.Clamp(currentSuspicion + amount, 0f, maxSuspicion);
 
         if (suspicionSlider != null)
         {
@@ -63,5 +63,18 @@ public class SusMeter : MonoBehaviour
 
         MemoryBoard.SetVariable("SuspicionLevel", currentSuspicion.ToString());
         Debug.Log($"Suspicion increased to {currentSuspicion}");
+    }
+
+    public void SetSuspicion(float amount)
+    {
+        currentSuspicion = Mathf.Clamp(amount, 0f, maxSuspicion);
+
+        if (suspicionSlider != null)
+        {
+            suspicionSlider.value = currentSuspicion; 
+        }
+
+        MemoryBoard.SetVariable("SuspicionLevel", currentSuspicion.ToString());
+        Debug.Log($"Suspicion set to {currentSuspicion}");
     }
 }

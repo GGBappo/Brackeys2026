@@ -18,6 +18,18 @@ public class AIBehavior : MonoBehaviour
     private bool isPatrolling = false;
     private bool isWaiting = false;
 
+    private void OnEnable()
+    {
+        GameEvents.OnRequestDialogueStart += PausePatrol;
+        GameEvents.OnDialogueSequenceCompleted += ResumePatrol;
+    }
+
+    private void OnDisable()
+    {
+        GameEvents.OnRequestDialogueStart -= PausePatrol;
+        GameEvents.OnDialogueSequenceCompleted -= ResumePatrol;
+    }
+
     private void OnValidate()
     {
         if (agent == null)
@@ -155,5 +167,33 @@ public class AIBehavior : MonoBehaviour
         while (waypoints.Count > 1 && randomIndex == lastIndex);
 
         lastIndex = randomIndex;
+    }
+
+    private void PausePatrol(RuntimeDialogueGraph graph, string nodeID)
+    {
+        if (graph != null)
+        {
+            string targetID = string.IsNullOrEmpty(nodeID) ? graph.EntryNodeID : nodeID;
+            RuntimeDialogueNode startNode = graph.AllNodes.Find(n => n.NodeID == targetID);
+            
+            // Ignores phone texts so the AI does not freeze when your phone buzzes
+            if (startNode != null && startNode.IsPhoneText) return;
+        }
+
+        if (agent != null && agent.isActiveAndEnabled)
+        {
+            agent.isStopped = true;
+            isPatrolling = false;
+            if (animator != null) animator.SetBool("isWalking", false);
+        }
+    }
+
+    private void ResumePatrol()
+    {
+        if (agent != null && agent.isActiveAndEnabled && waypoints.Count > 0)
+        {
+            agent.isStopped = false;
+            isPatrolling = true;
+        }
     }
 }

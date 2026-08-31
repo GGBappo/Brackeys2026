@@ -112,6 +112,12 @@ public class ActionNode : Node
             context.AddInputPort<string>("Black Screen Text").Build();
             context.AddInputPort<float>("Hold Duration").Build();
         }
+        else if (currentAction == ActionNodeType.SetSuspicion || 
+                 currentAction == ActionNodeType.IncreaseSuspicion || 
+                 currentAction == ActionNodeType.DecreaseSuspicion)
+        {
+            context.AddInputPort<float>("Suspicion Amount").Build();
+        }
 
         context.AddOutputPort("out").Build();
     }

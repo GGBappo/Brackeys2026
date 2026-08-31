@@ -11,6 +11,7 @@ public class IntroManager : MonoBehaviour
     [Header("AI Routing")]
     public AIBehavior partnerAI;
     public Transform livingRoomWaypoint;
+    public AISuspicionZone suspicionZone; // NEW: Drag your Suspicion Zone object here
     
     [Header("Timing")]
     public float delayBeforePhoneText = 4f;
@@ -28,16 +29,27 @@ public class IntroManager : MonoBehaviour
 
     private void OnEnable()
     {
-        GameEvents.OnRequestDialogueEnd += OnDialogueEnded;
+        GameEvents.OnDialogueSequenceCompleted += OnDialogueEnded;
     }
 
     private void OnDisable()
     {
-        GameEvents.OnRequestDialogueEnd -= OnDialogueEnded;
+        GameEvents.OnDialogueSequenceCompleted -= OnDialogueEnded;
     }
 
     private void Start()
     {
+        if (partnerAI != null && _aiAgent != null)
+        {
+            partnerAI.enabled = false;
+            _aiAgent.isStopped = true;
+        }
+
+        if (suspicionZone != null)
+        {
+            suspicionZone.enabled = false;
+        }
+
         if (introGraph != null)
         {
             GameEvents.RequestDialogueStart(introGraph, null);
@@ -46,7 +58,6 @@ public class IntroManager : MonoBehaviour
 
     private void OnDialogueEnded()
     {
-        
         if (!_introFinished)
         {
             _introFinished = true;
@@ -58,7 +69,6 @@ public class IntroManager : MonoBehaviour
     {
         if (partnerAI != null && _aiAgent != null)
         {
-            partnerAI.enabled = false; 
             _aiAgent.isStopped = false;
             _aiAgent.SetDestination(livingRoomWaypoint.position);
         }
@@ -70,9 +80,7 @@ public class IntroManager : MonoBehaviour
             GameEvents.RequestDialogueStart(phoneTextGraph, null);
         }
 
-        if (partnerAI != null)
-        {
-            partnerAI.enabled = true;
-        }
+        if (partnerAI != null) partnerAI.enabled = true;
+        if (suspicionZone != null) suspicionZone.enabled = true;
     }
 }

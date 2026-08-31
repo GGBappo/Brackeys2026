@@ -270,7 +270,7 @@ public class DialogueManager : MonoBehaviour
         if (currentNode.IsPhoneText)
         {
             dialogueUIPrefab.SetActive(false);
-            phoneUIPrefab.SetActive(true);
+            
             GameEvents.RequestPlaySFX("PhoneVibrate");
 
             bool isPlayer = (currentNode.SpeakerName == "You" || currentNode.SpeakerName == "MC");
@@ -292,21 +292,18 @@ public class DialogueManager : MonoBehaviour
                     {
                         phoneController.ReceiveNewText(choiceData.ChoiceText, true);
                         
-                        if (!string.IsNullOrEmpty(choiceData.DestinationNodeID))
-                        {
-                            ShowNode(choiceData.DestinationNodeID);
-                        }
-                        else
-                        {
-                            EndDialogue();
-                        }
+                        if (!string.IsNullOrEmpty(choiceData.DestinationNodeID)) ShowNode(choiceData.DestinationNodeID);
+                        else EndDialogue();
                     });
                 }
             }
+            
+            ExecuteNodeAction(currentNode.Action);
+            return; 
         }
         else
         {
-            phoneUIPrefab.SetActive(false);
+            phoneController.ForceClosePhone(); 
             dialogueUIPrefab.SetActive(true);
         }
 
@@ -439,6 +436,18 @@ public class DialogueManager : MonoBehaviour
             case ActionNodeType.HideSusMeter:
                 SusMeter.Instance.gameObject.SetActive(false);
                 break;
+            case ActionNodeType.IncreaseSuspicion:
+                if (float.TryParse(actionData.MemoryValue, out float incAmount))
+                    SusMeter.Instance.AddSuspicion(incAmount);
+                break;
+            case ActionNodeType.DecreaseSuspicion:
+                if (float.TryParse(actionData.MemoryValue, out float decAmount))
+                    SusMeter.Instance.AddSuspicion(-decAmount); // Pass negative to decrease
+                break;
+            case ActionNodeType.SetSuspicion:
+                if (float.TryParse(actionData.MemoryValue, out float setAmount))
+                    SusMeter.Instance.SetSuspicion(setAmount);
+                break;
             default:
                 break;
         }
@@ -458,6 +467,7 @@ public class DialogueManager : MonoBehaviour
         }
 
         GameEvents.GlobalStateChanged(_stateBeforeDialogue);
+        GameEvents.DialogueSequenceCompleted();
     }
 
     private void TrackState(GlobalStateType newState)
