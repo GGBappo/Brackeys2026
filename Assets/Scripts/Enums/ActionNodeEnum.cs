@@ -6,5 +6,8 @@ public enum ActionNodeType{
     TriggerBlackScreen,
     EndBlackScreen,
     ShowSusMeter,
-    HideSusMeter
+    HideSusMeter,
+    SetSuspicion,
+    IncreaseSuspicion,
+    DecreaseSuspicion
 }

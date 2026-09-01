@@ -179,6 +179,14 @@ public class DialogueGraphImporter : ScriptedImporter
             actionData.HoldDuration = GetPortValue<float>(durationPort);
         }
 
+        else if (actionType == ActionNodeType.SetSuspicion || 
+                 actionType == ActionNodeType.IncreaseSuspicion || 
+                 actionType == ActionNodeType.DecreaseSuspicion)
+        {
+            var amountPort = node.GetInputPortByName("Suspicion Amount");
+            actionData.MemoryValue = GetPortValue<float>(amountPort).ToString();
+        }
+
         runtimeNode.Action = actionData;
 
         var nextNodePort = node.GetOutputPortByName("out")?.firstConnectedPort; 
