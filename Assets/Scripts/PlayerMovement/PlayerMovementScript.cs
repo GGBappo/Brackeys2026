@@ -90,6 +90,8 @@ public class PlayerMovementScript : MonoBehaviour
 
         if (Physics.Raycast(ray, out RaycastHit hit, interactRange))
         {
+            Debug.Log($"Raycast hit: {hit.collider.name} | Tag: {hit.collider.tag} | Layer: {LayerMask.LayerToName(hit.collider.gameObject.layer)} | Point: {hit.point}");
+
             InteractableItem interactable = hit.collider != null
                 ? hit.collider.GetComponent<InteractableItem>()
                 : null;
@@ -114,6 +116,8 @@ public class PlayerMovementScript : MonoBehaviour
         }
         else
         {
+            Debug.Log("Raycast hit nothing.");
+
             if (pickUpPrompt != null)
             {
                 pickUpPrompt.SetActive(false);
