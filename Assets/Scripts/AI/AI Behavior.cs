@@ -10,6 +10,7 @@ public class AIBehavior : MonoBehaviour
     [SerializeField] private NavMeshAgent agent;
     [SerializeField] private Animator animator;
     [SerializeField] private float waitTime = 2f;
+    [SerializeField] private bool startPatrolOnStart = true;
 
     private int randomIndex;
     private int lastIndex;
@@ -17,9 +18,17 @@ public class AIBehavior : MonoBehaviour
 
     private bool isPatrolling = false;
     private bool isWaiting = false;
+    private bool suppressAutoStart = false;
+
+    private void Awake()
+    {
+        CacheComponents();
+    }
 
     private void OnEnable()
     {
+        CacheComponents();
+
         GameEvents.OnRequestDialogueStart += PausePatrol;
         GameEvents.OnDialogueSequenceCompleted += ResumePatrol;
     }
@@ -32,95 +41,132 @@ public class AIBehavior : MonoBehaviour
 
     private void OnValidate()
     {
-        if (agent == null)
-        {
-            agent = GetComponent<NavMeshAgent>();
-        }
-
-        if (animator == null)
-        {
-            animator = GetComponentInChildren<Animator>();
-        }
+        CacheComponents();
     }
 
     private void Start()
     {
-        Debug.Log("AIBehavior Start called");
-
-        if (agent == null)
+        if (startPatrolOnStart && !suppressAutoStart)
         {
-            agent = GetComponent<NavMeshAgent>();
+            BeginPatrol();
         }
-
-        if (animator == null)
-        {
-            animator = GetComponentInChildren<Animator>();
-        }
-
-        Debug.Log($"Waypoints count: {waypoints.Count}");
-        Debug.Log($"Agent found: {agent != null}");
-        Debug.Log($"Agent enabled: {agent.enabled}");
-        Debug.Log($"Agent on NavMesh: {agent.isOnNavMesh}");
-        Debug.Log($"Animator found: {animator != null}");
-
-        if (waypoints.Count == 0 || agent == null)
-        {
-            Debug.LogWarning("AIBehavior: Missing agent or waypoints.");
-            return;
-        }
-
-        if (!agent.isOnNavMesh)
-        {
-            Debug.LogWarning("AIBehavior: Agent is not on the NavMesh.");
-            return;
-        }
-
-        agent.isStopped = false;
-        agent.ResetPath();
-
-        SelectRandomWaypoint();
-
-        Debug.Log($"Setting destination to: {waypoints[randomIndex].name}");
-
-        agent.SetDestination(waypoints[randomIndex].position);
-
-        isPatrolling = true;
     }
 
     private void Update()
     {
-        if (agent == null || waypoints.Count == 0)
+        if (agent == null || waypoints == null || waypoints.Count == 0 || isWaiting || !isPatrolling)
         {
             return;
         }
 
         UpdateAnimation();
 
-        if (isWaiting)
-        {
-            return;
-        }
-
         if (!agent.pathPending &&
             agent.hasPath &&
             agent.remainingDistance <= agentStopDistance)
         {
-            Debug.Log("Reached waypoint");
-
             StartCoroutine(WaitAtWaypoint());
+        }
+    }
+
+    public void BeginPatrol()
+    {
+        suppressAutoStart = false;
+
+        if (agent == null)
+        {
+            CacheComponents();
+        }
+
+        if (agent == null || waypoints == null || waypoints.Count == 0)
+        {
+            return;
+        }
+
+        if (!agent.isOnNavMesh)
+        {
+            return;
+        }
+
+        isWaiting = false;
+        isPatrolling = true;
+
+        agent.isStopped = false;
+        agent.ResetPath();
+
+        SelectRandomWaypoint();
+        agent.SetDestination(waypoints[randomIndex].position);
+    }
+
+    public void StopPatrol(bool suppressNextAutoStart = true)
+    {
+        if (suppressNextAutoStart)
+        {
+            suppressAutoStart = true;
+        }
+
+        if (agent == null)
+        {
+            CacheComponents();
+        }
+
+        isPatrolling = false;
+        isWaiting = false;
+
+        if (agent != null)
+        {
+            agent.isStopped = true;
+            agent.ResetPath();
+        }
+
+        if (animator != null)
+        {
+            animator.SetBool("isWalking", false);
+        }
+    }
+
+    public bool MoveTo(Vector3 destination)
+    {
+        if (agent == null)
+        {
+            CacheComponents();
+        }
+
+        if (agent == null || !agent.isOnNavMesh)
+        {
+            return false;
+        }
+
+        isWaiting = false;
+        isPatrolling = false;
+
+        agent.isStopped = false;
+        agent.ResetPath();
+
+        return agent.SetDestination(destination);
+    }
+
+    private void CacheComponents()
+    {
+        if (agent == null)
+        {
+            agent = GetComponent<NavMeshAgent>();
+        }
+
+        if (animator == null)
+        {
+            animator = GetComponentInChildren<Animator>();
         }
     }
 
     private void UpdateAnimation()
     {
-        if (animator == null)
+        if (animator == null || agent == null)
         {
             return;
         }
 
-        // Check if the NavMeshAgent is actually moving
-        bool isWalking = agent.velocity.magnitude > 0.1f && !isWaiting;
-
+        bool isWalking = agent.velocity.magnitude > 0.1f && !isWaiting && isPatrolling;
         animator.SetBool("isWalking", isWalking);
     }
 
@@ -128,10 +174,8 @@ public class AIBehavior : MonoBehaviour
     {
         isWaiting = true;
         isPatrolling = false;
-
         agent.isStopped = true;
 
-        // Make sure walking animation stops immediately
         if (animator != null)
         {
             animator.SetBool("isWalking", false);
@@ -144,9 +188,7 @@ public class AIBehavior : MonoBehaviour
         if (waypoints.Count > 0)
         {
             agent.isStopped = false;
-
             agent.SetDestination(waypoints[randomIndex].position);
-
             isPatrolling = true;
         }
 
@@ -175,25 +217,22 @@ public class AIBehavior : MonoBehaviour
         {
             string targetID = string.IsNullOrEmpty(nodeID) ? graph.EntryNodeID : nodeID;
             RuntimeDialogueNode startNode = graph.AllNodes.Find(n => n.NodeID == targetID);
-            
+
             // Ignores phone texts so the AI does not freeze when your phone buzzes
-            if (startNode != null && startNode.IsPhoneText) return;
+            if (startNode != null && startNode.IsPhoneText)
+            {
+                return;
+            }
         }
 
-        if (agent != null && agent.isActiveAndEnabled)
-        {
-            agent.isStopped = true;
-            isPatrolling = false;
-            if (animator != null) animator.SetBool("isWalking", false);
-        }
+        StopPatrol(false);
     }
 
     private void ResumePatrol()
     {
         if (agent != null && agent.isActiveAndEnabled && waypoints.Count > 0)
         {
-            agent.isStopped = false;
-            isPatrolling = true;
+            BeginPatrol();
         }
     }
 }

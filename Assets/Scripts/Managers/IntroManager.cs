@@ -1,5 +1,5 @@
-using UnityEngine;
 using System.Collections;
+using UnityEngine;
 using UnityEngine.AI;
 
 public class IntroManager : MonoBehaviour
@@ -7,16 +7,16 @@ public class IntroManager : MonoBehaviour
     [Header("Graphs")]
     public RuntimeDialogueGraph introGraph;
     public RuntimeDialogueGraph phoneTextGraph;
-    
+
     [Header("AI Routing")]
     public AIBehavior partnerAI;
     public Transform livingRoomWaypoint;
-    public AISuspicionZone suspicionZone; // NEW: Drag your Suspicion Zone object here
-    
+    public AISuspicionZone suspicionZone;
+
     [Header("Timing")]
     public float delayBeforePhoneText = 4f;
 
-    private bool _introFinished = false;
+    private bool _introFinished;
     private NavMeshAgent _aiAgent;
 
     private void Awake()
@@ -24,6 +24,7 @@ public class IntroManager : MonoBehaviour
         if (partnerAI != null)
         {
             _aiAgent = partnerAI.GetComponent<NavMeshAgent>();
+            partnerAI.StopPatrol();
         }
     }
 
@@ -39,9 +40,8 @@ public class IntroManager : MonoBehaviour
 
     private void Start()
     {
-        if (partnerAI != null && _aiAgent != null)
+        if (_aiAgent != null)
         {
-            partnerAI.enabled = false;
             _aiAgent.isStopped = true;
         }
 
@@ -58,19 +58,20 @@ public class IntroManager : MonoBehaviour
 
     private void OnDialogueEnded()
     {
-        if (!_introFinished)
+        if (_introFinished)
         {
-            _introFinished = true;
-            StartCoroutine(SequenceAIExitAndPhone());
+            return;
         }
+
+        _introFinished = true;
+        StartCoroutine(SequenceAIExitAndPhone());
     }
 
     private IEnumerator SequenceAIExitAndPhone()
     {
-        if (partnerAI != null && _aiAgent != null)
+        if (partnerAI != null && livingRoomWaypoint != null)
         {
-            _aiAgent.isStopped = false;
-            _aiAgent.SetDestination(livingRoomWaypoint.position);
+            partnerAI.MoveTo(livingRoomWaypoint.position);
         }
 
         yield return new WaitForSeconds(delayBeforePhoneText);
@@ -80,7 +81,14 @@ public class IntroManager : MonoBehaviour
             GameEvents.RequestDialogueStart(phoneTextGraph, null);
         }
 
-        if (partnerAI != null) partnerAI.enabled = true;
-        if (suspicionZone != null) suspicionZone.enabled = true;
+        if (partnerAI != null)
+        {
+            partnerAI.BeginPatrol();
+        }
+
+        if (suspicionZone != null)
+        {
+            suspicionZone.enabled = true;
+        }
     }
 }
